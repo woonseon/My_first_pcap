@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pcap.h>
 #include <netinet/in.h>
+#include <stdint.h>
 
 #include <errno.h>
 #include <arpa/inet.h>
@@ -22,11 +23,12 @@ int main(int argc, char *argv[])
     char *dev;			// network device name
     char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
     const u_char *pkt_data;   //
-    unsigned short ether_type;
+    uint16_t ether_type;
     struct pcap_pkthdr *header;
 
     /* Define the device */
-    dev = pcap_lookupdev(errbuf);   // get network device name
+    //    dev = pcap_lookupdev(errbuf);   // get network device name
+    dev = argv[1];
     if (dev == NULL) {
         fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
         return(2);
@@ -39,7 +41,7 @@ int main(int argc, char *argv[])
         return(2);
     }
 
-    handle = pcap_open_live(argv[2], BUFSIZ, 1, 1000, errbuf);
+    handle = pcap_open_live(argv[1], BUFSIZ, 1, 1000, errbuf);
     if (handle == NULL) {
         fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
         return(2);
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
             printf("---------------ip packet---------------\n");
             //printf("Src Address : %s\n", inet_ntoa(iph->ip_src));   // return string type
             //printf("Dst Address : %s\n", inet_ntoa(iph->ip_dst));
-            char buf[20];
+            char buf[INET_ADDRSTRLEN];
             printf("Src Address : %s\n", inet_ntop(AF_INET, &(iph->ip_src), buf, sizeof(buf)));   // return string type
             printf("Dst Address : %s\n", inet_ntop(AF_INET, &(iph->ip_dst), buf, sizeof(buf)));
 
