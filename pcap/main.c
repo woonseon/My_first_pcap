@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
             printf("---------------else data---------------\n");
             printf("data length = %d\n", data_length);
             for (int i=0; i<data_length; i++)
-                printf("%.2X ", pkt_data[i]);
+                printf("%c ", pkt_data[i]);
             printf("\n=========================================\n");
             printf("\n");
         }
