@@ -34,17 +34,24 @@ int main(int argc, char *argv[])
 
     printf("DEV: %s\n", dev);   // network device name
 
-    handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
+    if(argc < 2){
+        fprintf(stderr, "Please put the argv[2]\n");
+        return(2);
+    }
+
+    handle = pcap_open_live(argv[2], BUFSIZ, 1, 1000, errbuf);
     if (handle == NULL) {
         fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
         return(2);
     }
 
     // grab packet
-    while(1)
+    while(pcap_next_ex(handle, &header, &pkt_data)>=0)
     {
         //pkt_data = NULL;
-        pcap_next_ex(handle, &header, &pkt_data);
+        if(pcap_next_ex(handle, &header, &pkt_data) == 0)
+            continue;
+
         eth = (struct ether_header *)pkt_data;
 
         // IP 헤더를 가져오기 위해서
@@ -69,8 +76,11 @@ int main(int argc, char *argv[])
             // IP 헤더에서 데이타 정보를 출력한다.
             iph = (struct ip *)pkt_data;
             printf("---------------ip packet---------------\n");
-            printf("Src Address : %s\n", inet_ntoa(iph->ip_src));
-            printf("Dst Address : %s\n", inet_ntoa(iph->ip_dst));
+            //printf("Src Address : %s\n", inet_ntoa(iph->ip_src));   // return string type
+            //printf("Dst Address : %s\n", inet_ntoa(iph->ip_dst));
+            char buf[20];
+            printf("Src Address : %s\n", inet_ntop(AF_INET, &(iph->ip_src), buf, sizeof(buf)));   // return string type
+            printf("Dst Address : %s\n", inet_ntop(AF_INET, &(iph->ip_dst), buf, sizeof(buf)));
 
             // if TCP
             if (iph->ip_p == IPPROTO_TCP)
